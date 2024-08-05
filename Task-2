@@ -1,0 +1,70 @@
+import requests
+from bs4 import BeautifulSoup
+
+# Function to fetch product details from Flipkart
+def fetch_flipkart_products(url):
+    # Headers to mimic a browser visit
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    
+    # Send the HTTP request to the URL
+    response = requests.get(url, headers=headers)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the page content
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Find all product containers
+        product_containers = soup.find_all('div', {'class': '_1AtVbE'})
+        
+        # Iterate through each product and extract information
+        for product in product_containers:
+            try:
+                # Extract product name
+                name_tag = product.find('a', {'class': 'IRpwTa'})
+                if name_tag:
+                    name = name_tag.text
+                
+                # Extract product price
+                price_tag = product.find('div', {'class': '_30jeq3'})
+                if price_tag:
+                    price = price_tag.text
+                
+                # Extract product rating
+                rating_tag = product.find('div', {'class': '_3LWZlK'})
+                if rating_tag:
+                    rating = rating_tag.text
+                
+                # Extract number of reviews
+                reviews_tag = product.find('span', {'class': '_2_R_DZ'})
+                if reviews_tag:
+                    reviews = reviews_tag.text
+                
+                # Extract product URL
+                url_tag = product.find('a', {'class': 'IRpwTa'})
+                if url_tag:
+                    product_url = 'https://www.flipkart.com' + url_tag['href']
+                
+                # Print the extracted details
+                if name and price and rating and reviews and product_url:
+                    print(f"Product Name: {name}")
+                    print(f"Price: {price}")
+                    print(f"Rating: {rating}")
+                    print(f"Number of Reviews: {reviews}")
+                    print(f"Product URL: {product_url}")
+                    print('-' * 40)
+
+            except AttributeError as e:
+                # Skip if any attribute is not found or there's an error
+                print(f"Error: {e}")
+                continue
+
+    else:
+        print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+
+# URL for the Flipkart Laptops category
+flipkart_url = 'https://www.flipkart.com/laptops/pr?sid=6bo%2Cb5g'
+
+# Fetch products from Flipkart
+fetch_flipkart_products(flipkart_url)
